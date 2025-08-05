@@ -1124,6 +1124,8 @@ class Classify(nn.Module):
 
 
 import traceback
+
+
 # (Lam) Thêm phần FEM và FSM
 class FEM(nn.Module):
     def __init__(self, ch_s_minus1, ch_s, ch_s_plus1):
@@ -1131,25 +1133,26 @@ class FEM(nn.Module):
         super().__init__()
         self.b = 0.5
         self.conv1 = Conv(ch_s, ch_s_plus1, k=3, s=2)
-        self.c3_1 = C3(ch_s_plus1, ch_s_plus1) # phuc vu cho (1)
+        self.c3_1 = C3(ch_s_plus1, ch_s_plus1)  # phuc vu cho (1)
 
         self.conv2 = Conv(ch_s_minus1, ch_s, k=3, s=2)
         self.c3_2 = C3(ch_s, ch_s)
         self.conv3 = Conv(ch_s, ch_s_plus1, k=3, s=2)
-        self.c3_3 = C3(ch_s_plus1, ch_s_plus1) #phuc vu cho (2)
+        self.c3_3 = C3(ch_s_plus1, ch_s_plus1)  # phuc vu cho (2)
 
         self.conv4 = Conv(ch_s_minus1, ch_s, k=3, s=2)
-        self.c3_4 = C3(ch_s, ch_s) #phuc vu cho (4)
+        self.c3_4 = C3(ch_s, ch_s)  # phuc vu cho (4)
 
     def forward(self, x):
         P_s_minus1_phay, P_s_phay, P_s_plus1_phay = x
-        P3_s_plus1 = self.c3_1(self.conv1(P_s_phay)) # (1)
-        P2_s_plus1 = self.c3_3(self.conv3(self.c3_2(self.conv2(P_s_minus1_phay)))) # (2)
-        P1_s = self.c3_4(self.conv4(P_s_minus1_phay)) # (4)
+        P3_s_plus1 = self.c3_1(self.conv1(P_s_phay))  # (1)
+        P2_s_plus1 = self.c3_3(self.conv3(self.c3_2(self.conv2(P_s_minus1_phay))))  # (2)
+        P1_s = self.c3_4(self.conv4(P_s_minus1_phay))  # (4)
 
-        P_s_plus1 = P_s_plus1_phay + self.b * P3_s_plus1 + self.b * P2_s_plus1 # (3)
-        P_s = P_s_phay + self.b * P1_s # (5)
+        P_s_plus1 = P_s_plus1_phay + self.b * P3_s_plus1 + self.b * P2_s_plus1  # (3)
+        P_s = P_s_phay + self.b * P1_s  # (5)
         return P_s_minus1_phay, P_s, P_s_plus1
+
 
 class FSM(nn.Module):
     def __init__(self, ch_s_minus1, ch_s, ch_s_plus1):
@@ -1158,26 +1161,26 @@ class FSM(nn.Module):
         super().__init__()
         self.a = 0.5
         self.conv1 = Conv(ch_s_plus1, ch_s, k=1, s=1)
-        self.upsample1 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.c3_1 = C3(ch_s, ch_s) # => phuc vu cho (6)
+        self.upsample1 = nn.Upsample(scale_factor=2, mode="nearest")
+        self.c3_1 = C3(ch_s, ch_s)  # => phuc vu cho (6)
 
         self.conv2 = Conv(ch_s, ch_s_minus1, k=1, s=1)
-        self.upsample2 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.c3_2 = C3(ch_s_minus1, ch_s_minus1) # => phuc vu cho (9)
+        self.upsample2 = nn.Upsample(scale_factor=2, mode="nearest")
+        self.c3_2 = C3(ch_s_minus1, ch_s_minus1)  # => phuc vu cho (9)
 
         self.conv3 = Conv(ch_s, ch_s_minus1, k=1, s=1)
-        self.upsample3 = nn.Upsample(scale_factor=2, mode='nearest')
-        self.c3_3 = C3(ch_s_minus1, ch_s_minus1) # => phuc vu cho (8)
+        self.upsample3 = nn.Upsample(scale_factor=2, mode="nearest")
+        self.c3_3 = C3(ch_s_minus1, ch_s_minus1)  # => phuc vu cho (8)
 
     def forward(self, x):
         print(f"🐍 FSM forward với input {[t.shape for t in x]}")
         P_s_minus1, P_s, P_s_plus1 = x
-        P1_s_plus1 = self.c3_1(self.upsample1(self.conv1(P_s_plus1))) # (6)
-        P2_s = self.c3_3(self.upsample3(self.conv3(P_s))) # (9)
-        P3_s_plus1 = self.c3_2(self.upsample2(self.conv2(P1_s_plus1))) # (8)
+        P1_s_plus1 = self.c3_1(self.upsample1(self.conv1(P_s_plus1)))  # (6)
+        P2_s = self.c3_3(self.upsample3(self.conv3(P_s)))  # (9)
+        P3_s_plus1 = self.c3_2(self.upsample2(self.conv2(P1_s_plus1)))  # (8)
 
-        P_s_star = P_s - self.a * P1_s_plus1 # (7)
-        P_s_minus1_star = P_s_minus1 - self.a * P2_s - self.a * P3_s_plus1 #(10)
+        P_s_star = P_s - self.a * P1_s_plus1  # (7)
+        P_s_minus1_star = P_s_minus1 - self.a * P2_s - self.a * P3_s_plus1  # (10)
         return P_s_minus1_star, P_s_star, P_s_plus1
 
 
@@ -1186,5 +1189,6 @@ class Get(nn.Module):
     def __init__(self, index=0):
         super().__init__()
         self.index = index
+
     def forward(self, x):
         return x[self.index]

@@ -1,5 +1,6 @@
-from models.yolo import Model
 import models.common
+from models.yolo import Model
+
 print("models.common loaded from:", models.common.__file__)
 
 # Sửa lại đường dẫn cho đúng file yaml của bạn

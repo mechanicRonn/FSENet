@@ -1,9 +1,11 @@
-import torch
+import math
+
 import cv2
 import matplotlib.pyplot as plt
+import torch
 from torchvision import transforms
+
 from models.common import DetectMultiBackend
-import math
 
 # === 1. Load mô hình đã huấn luyện ===
 weights = "runs/train/exp/weights/best.pt"  # đổi nếu cần
@@ -26,9 +28,11 @@ img_tensor = transforms.ToTensor()(img_resized).unsqueeze(0).to(device)
 # === 3. Hook layer để lấy feature ===
 feature_maps = {}
 
+
 def hook_fn(module, input, output):
     print("🎯 Hook activated. Feature shape:", output.shape)
     feature_maps["target"] = output.detach().cpu()
+
 
 # Chọn một layer phù hợp (Conv layer nông)
 target_layer_index = 17  # 6 là index của layer Conv2d(32, 3, kernel_size=(3, 3), stride=(1, 1)) trong mô hình yolov5s
