@@ -1,7 +1,8 @@
-import torch
 import cv2
 import matplotlib.pyplot as plt
+import torch
 from torchvision import transforms
+
 from models.common import DetectMultiBackend
 
 # === 1. Load mô hình đã huấn luyện ===
@@ -28,9 +29,11 @@ feature_maps = {}
 # Lựa chọn channel bạn muốn hiển thị
 channel_to_display = 5  # <-- Chọn số channel bạn muốn ở đây
 
+
 def hook_fn(module, input, output):
     print("🎯 Hook activated. Feature shape:", output.shape)
     feature_maps["target"] = output.detach().cpu()
+
 
 # Chọn một layer phù hợp để hook (ví dụ layer 17)
 target_layer_index = 17
@@ -50,8 +53,8 @@ if "target" in feature_maps:
     else:
         plt.figure(figsize=(6, 6))
         plt.imshow(fmap[channel_to_display], cmap="viridis")
-        #plt.title(f"Feature map at Channel {channel_to_display}")
-        plt.title(f"Yolov5")
+        # plt.title(f"Feature map at Channel {channel_to_display}")
+        plt.title("Yolov5")
         plt.axis("off")
 
         save_path = f"D:/Lam/Lam Lab/PycharmProjects/Yolov5/TEMP_FeatureMap/anh1/feature_map_output_layer{target_layer_index}_channel{channel_to_display}.png"
