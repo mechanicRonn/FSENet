@@ -29,6 +29,8 @@ from models.common import (
     C3,
     C3SPP,
     C3TR,
+    FEM,
+    FSM,
     SPP,
     SPPF,
     Bottleneck,
@@ -45,12 +47,10 @@ from models.common import (
     DWConvTranspose2d,
     Expand,
     Focus,
+    Get,
     GhostBottleneck,
     GhostConv,
     Proto,
-    FSM,
-    FEM,
-    Get
 )
 from models.experimental import MixConv2d
 from utils.autoanchor import check_anchor_order
@@ -193,7 +193,7 @@ class BaseModel(nn.Module):
                     for j in m.f:
                         if j == -1:
                             inps.append(x)
-                            print(f"      y[-1] lấy từ input x")
+                            print("      y[-1] lấy từ input x")
                         else:
                             if j >= len(y):
                                 print(f"❌ LỖI: y chưa có index {j} (len(y)={len(y)})")
@@ -209,7 +209,8 @@ class BaseModel(nn.Module):
                 y.append(x)
                 if isinstance(x, tuple):
                     print(
-                        f"[DEBUG]     Layer {m.i} output là tuple có {len(x)} phần tử. Mỗi phần tử: {[type(xx) for xx in x]}")
+                        f"[DEBUG]     Layer {m.i} output là tuple có {len(x)} phần tử. Mỗi phần tử: {[type(xx) for xx in x]}"
+                    )
             else:
                 y.append(None)
             print(f"[DEBUG]     Sau layer {m.i}, y.len={len(y)}, y[-1] type: {type(y[-1])}")
@@ -535,7 +536,6 @@ class ClassificationModel(BaseModel):
 
 def parse_model(d, ch):
     """Parses a YOLOv5 model from a dict `d`, configuring layers based on input channels `ch` and model architecture."""
-    import traceback
     LOGGER.info(f"\n{'':>3}{'from':>18}{'n':>3}{'params':>10}  {'module':<40}{'arguments':<30}")
     anchors, nc, gd, gw, act, ch_mul = (
         d["anchors"],
